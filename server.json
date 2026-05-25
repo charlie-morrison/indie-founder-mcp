@@ -1,7 +1,7 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.charlie-morrison/indie-founder-mcp",
-  "description": "Aggregates Lemon Squeezy + Gumroad + Polar + Stripe revenue into one Claude-queryable view. summary_mrr, top_customers, refund_signal, recent_orders, export_csv_for_tax (Ukrainian FOP) — for solo founders who want to ask Claude 'what's my MRR?' instead of opening four dashboards.",
+  "description": "Aggregates Lemon Squeezy, Gumroad, Polar, and Stripe revenue into one Claude-queryable view.",
   "version": "0.1.0",
   "title": "Indie Founder Revenue MCP",
   "websiteUrl": "https://github.com/charlie-morrison/indie-founder-mcp",
