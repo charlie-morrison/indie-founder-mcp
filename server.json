@@ -1,0 +1,61 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.charlie-morrison/indie-founder-mcp",
+  "description": "Aggregates Lemon Squeezy + Gumroad + Polar + Stripe revenue into one Claude-queryable view. summary_mrr, top_customers, refund_signal, recent_orders, export_csv_for_tax (Ukrainian FOP) — for solo founders who want to ask Claude 'what's my MRR?' instead of opening four dashboards.",
+  "version": "0.1.0",
+  "title": "Indie Founder Revenue MCP",
+  "websiteUrl": "https://github.com/charlie-morrison/indie-founder-mcp",
+  "repository": {
+    "url": "https://github.com/charlie-morrison/indie-founder-mcp",
+    "source": "github"
+  },
+  "packages": [
+    {
+      "registryType": "pypi",
+      "identifier": "indie-founder-mcp",
+      "version": "0.1.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "packageArguments": [],
+      "environmentVariables": [
+        {
+          "name": "LS_API_TOKEN",
+          "description": "Lemon Squeezy API token (https://app.lemonsqueezy.com/settings/api). Required to enable the LS adapter.",
+          "isRequired": false,
+          "isSecret": true
+        },
+        {
+          "name": "LS_STORE_ID",
+          "description": "Optional Lemon Squeezy store ID filter. Without it, the adapter returns data from every store on the account.",
+          "isRequired": false,
+          "isSecret": false
+        },
+        {
+          "name": "INDIE_FOUNDER_MCP_TRANSPORT",
+          "description": "Transport selector. One of: stdio (default), streamable-http, sse.",
+          "isRequired": false,
+          "isSecret": false,
+          "default": "stdio"
+        },
+        {
+          "name": "INDIE_FOUNDER_MCP_LICENSE_KEY",
+          "description": "Reserved for v0.2 paid-tier gating. Currently ignored.",
+          "isRequired": false,
+          "isSecret": true
+        }
+      ]
+    }
+  ],
+  "_meta": {
+    "io.github.charlie-morrison/category": "billing-revenue",
+    "io.github.charlie-morrison/tools": [
+      "summary_mrr",
+      "top_customers",
+      "refund_signal",
+      "recent_orders",
+      "export_csv_for_tax",
+      "health"
+    ]
+  }
+}

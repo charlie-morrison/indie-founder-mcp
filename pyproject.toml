@@ -1,0 +1,36 @@
+[project]
+name = "indie-founder-mcp"
+version = "0.1.0a0"
+description = "MCP server aggregating Lemon Squeezy + Gumroad + Polar + Stripe revenue into one Claude-queryable view."
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Charlie Morrison" }]
+requires-python = ">=3.11"
+dependencies = [
+    "mcp[cli]>=1.27.0",
+    "httpx>=0.27.0",
+    "pydantic>=2.7.0",
+    "python-dotenv>=1.0.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "respx>=0.21",
+    "ruff>=0.5",
+]
+
+[project.scripts]
+indie-founder-mcp = "indie_founder_mcp.server:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/indie_founder_mcp"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
