@@ -1,5 +1,7 @@
 # Indie Founder Revenue MCP
 
+<!-- mcp-name: io.github.charlie-morrison/indie-founder-mcp -->
+
 A Model Context Protocol server that aggregates revenue across **Lemon Squeezy + Gumroad + Polar + Stripe** into a single Claude-queryable view. A solo founder can ask Claude *"what's my MRR across all my stores?"* — and Claude answers from one tool call instead of four browser tabs.
 
 **Status:** v0.1 — Lemon Squeezy adapter live-validated against production. Gumroad / Polar / Stripe adapters land in v0.2.

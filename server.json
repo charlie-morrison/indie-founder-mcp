@@ -48,14 +48,16 @@
     }
   ],
   "_meta": {
-    "io.github.charlie-morrison/category": "billing-revenue",
-    "io.github.charlie-morrison/tools": [
-      "summary_mrr",
-      "top_customers",
-      "refund_signal",
-      "recent_orders",
-      "export_csv_for_tax",
-      "health"
-    ]
+    "io.modelcontextprotocol.registry/publisher-provided": {
+      "category": "billing-revenue",
+      "tools": [
+        "summary_mrr",
+        "top_customers",
+        "refund_signal",
+        "recent_orders",
+        "export_csv_for_tax",
+        "health"
+      ]
+    }
   }
 }
