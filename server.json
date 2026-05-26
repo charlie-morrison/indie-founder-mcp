@@ -11,13 +11,13 @@
   },
   "packages": [
     {
-      "registryType": "pypi",
-      "identifier": "indie-founder-mcp",
+      "registryType": "mcpb",
+      "identifier": "https://github.com/charlie-morrison/indie-founder-mcp/releases/download/v0.1.0/indie-founder-mcp-0.1.0.mcpb",
       "version": "0.1.0",
+      "fileSha256": "bb678a3a0ef3848c27d3c8d16bacee2617ea5126b98e8ee4aca7d5bbb56b827c",
       "transport": {
         "type": "stdio"
       },
-      "packageArguments": [],
       "environmentVariables": [
         {
           "name": "LS_API_TOKEN",
@@ -30,19 +30,6 @@
           "description": "Optional Lemon Squeezy store ID filter. Without it, the adapter returns data from every store on the account.",
           "isRequired": false,
           "isSecret": false
-        },
-        {
-          "name": "INDIE_FOUNDER_MCP_TRANSPORT",
-          "description": "Transport selector. One of: stdio (default), streamable-http, sse.",
-          "isRequired": false,
-          "isSecret": false,
-          "default": "stdio"
-        },
-        {
-          "name": "INDIE_FOUNDER_MCP_LICENSE_KEY",
-          "description": "Reserved for v0.2 paid-tier gating. Currently ignored.",
-          "isRequired": false,
-          "isSecret": true
         }
       ]
     }

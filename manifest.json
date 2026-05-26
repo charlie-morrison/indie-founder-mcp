@@ -1,0 +1,64 @@
+{
+  "manifest_version": "0.3",
+  "name": "indie-founder-mcp",
+  "display_name": "Indie Founder Revenue",
+  "version": "0.1.0",
+  "description": "Aggregates Lemon Squeezy + Gumroad + Polar + Stripe revenue into one Claude-queryable view.",
+  "long_description": "Indie Founder Revenue MCP gives Claude a single tool surface across Lemon Squeezy + Gumroad + Polar + Stripe. v0.1 ships the Lemon Squeezy adapter (live-validated against production), with the other adapters coming in v0.2. Tools: summary_mrr, top_customers, refund_signal, recent_orders, export_csv_for_tax (NBU-rate-anchored, for Ukrainian FOP 3rd-group filing), health.",
+  "author": {
+    "name": "Charlie Morrison",
+    "url": "https://github.com/charlie-morrison"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/charlie-morrison/indie-founder-mcp"
+  },
+  "homepage": "https://github.com/charlie-morrison/indie-founder-mcp",
+  "documentation": "https://github.com/charlie-morrison/indie-founder-mcp#readme",
+  "support": "https://github.com/charlie-morrison/indie-founder-mcp/issues",
+  "license": "MIT",
+  "keywords": ["billing", "revenue", "mrr", "lemonsqueezy", "gumroad", "polar", "stripe", "indie", "founder"],
+  "server": {
+    "type": "python",
+    "entry_point": "src/indie_founder_mcp/server.py",
+    "mcp_config": {
+      "command": "python3",
+      "args": ["${__dirname}/src/indie_founder_mcp/server.py"],
+      "env": {
+        "LS_API_TOKEN": "${user_config.ls_api_token}",
+        "LS_STORE_ID": "${user_config.ls_store_id}"
+      }
+    }
+  },
+  "tools": [
+    {"name": "summary_mrr", "description": "Combined MRR/ARR across every connected store."},
+    {"name": "top_customers", "description": "Highest-revenue customers in window."},
+    {"name": "refund_signal", "description": "Compares current N-day refund ratio to prior N-day window."},
+    {"name": "recent_orders", "description": "Last N orders across all stores."},
+    {"name": "export_csv_for_tax", "description": "CSV export for Ukrainian FOP 3rd-group quarterly filing."},
+    {"name": "health", "description": "Per-adapter healthcheck."}
+  ],
+  "user_config": {
+    "ls_api_token": {
+      "type": "string",
+      "title": "Lemon Squeezy API Token",
+      "description": "Lemon Squeezy API token (https://app.lemonsqueezy.com/settings/api). Required to enable the LS adapter.",
+      "sensitive": true,
+      "required": false
+    },
+    "ls_store_id": {
+      "type": "string",
+      "title": "Lemon Squeezy Store ID (optional)",
+      "description": "Optional. Without it, the adapter pulls from every store on the account.",
+      "sensitive": false,
+      "required": false
+    }
+  },
+  "compatibility": {
+    "platforms": ["darwin", "win32", "linux"],
+    "runtimes": {"python": ">=3.11"}
+  },
+  "_meta": {
+    "io.modelcontextprotocol.server": {"name": "io.github.charlie-morrison/indie-founder-mcp"}
+  }
+}
