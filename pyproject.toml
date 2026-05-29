@@ -1,6 +1,6 @@
 [project]
 name = "indie-founder-mcp"
-version = "0.1.0"
+version = "0.2.0"
 description = "MCP server aggregating Lemon Squeezy + Gumroad + Polar + Stripe revenue into one Claude-queryable view."
 readme = "README.md"
 license = { text = "MIT" }

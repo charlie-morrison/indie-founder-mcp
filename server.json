@@ -2,7 +2,7 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.charlie-morrison/indie-founder-mcp",
   "description": "Aggregates Lemon Squeezy, Gumroad, Polar, and Stripe revenue into one Claude-queryable view.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "title": "Indie Founder Revenue MCP",
   "websiteUrl": "https://github.com/charlie-morrison/indie-founder-mcp",
   "repository": {
@@ -12,24 +12,53 @@
   "packages": [
     {
       "registryType": "mcpb",
-      "identifier": "https://github.com/charlie-morrison/indie-founder-mcp/releases/download/v0.1.0/indie-founder-mcp-0.1.0.mcpb",
-      "version": "0.1.0",
-      "fileSha256": "bb678a3a0ef3848c27d3c8d16bacee2617ea5126b98e8ee4aca7d5bbb56b827c",
+      "identifier": "https://github.com/charlie-morrison/indie-founder-mcp/releases/download/v0.2.0/indie-founder-mcp-0.2.0.mcpb",
+      "version": "0.2.0",
       "transport": {
         "type": "stdio"
       },
       "environmentVariables": [
         {
           "name": "LS_API_TOKEN",
-          "description": "Lemon Squeezy API token (https://app.lemonsqueezy.com/settings/api). Required to enable the LS adapter.",
+          "description": "Lemon Squeezy API token (https://app.lemonsqueezy.com/settings/api). Enables the LS adapter.",
           "isRequired": false,
           "isSecret": true
         },
         {
           "name": "LS_STORE_ID",
-          "description": "Optional Lemon Squeezy store ID filter. Without it, the adapter returns data from every store on the account.",
+          "description": "Optional Lemon Squeezy store ID filter.",
           "isRequired": false,
           "isSecret": false
+        },
+        {
+          "name": "GUMROAD_ACCESS_TOKEN",
+          "description": "Gumroad OAuth access token (https://gumroad.com/settings/advanced). Enables the Gumroad adapter.",
+          "isRequired": false,
+          "isSecret": true
+        },
+        {
+          "name": "POLAR_API_TOKEN",
+          "description": "Polar.sh API token (https://polar.sh/settings/tokens). Enables the Polar adapter.",
+          "isRequired": false,
+          "isSecret": true
+        },
+        {
+          "name": "POLAR_ORG_ID",
+          "description": "Optional Polar organization ID filter.",
+          "isRequired": false,
+          "isSecret": false
+        },
+        {
+          "name": "STRIPE_API_KEY",
+          "description": "Stripe secret API key (https://dashboard.stripe.com/apikeys). Enables the Stripe adapter.",
+          "isRequired": false,
+          "isSecret": true
+        },
+        {
+          "name": "INDIE_FOUNDER_MCP_LICENSE_KEY",
+          "description": "Lemon Squeezy license key for the paid tier (top_customers, refund_signal, export_csv_for_tax). Free tools (summary_mrr, recent_orders, health) work without it. Buy at https://charliemorrison.lemonsqueezy.com.",
+          "isRequired": false,
+          "isSecret": true
         }
       ]
     }
@@ -44,7 +73,13 @@
         "recent_orders",
         "export_csv_for_tax",
         "health"
-      ]
+      ],
+      "tiers": {
+        "free": ["summary_mrr", "recent_orders", "health"],
+        "paid": ["top_customers", "refund_signal", "export_csv_for_tax"],
+        "paid_price_usd": {"monthly": 19, "yearly": 190},
+        "purchase_url": "https://charliemorrison.lemonsqueezy.com"
+      }
     }
   }
 }

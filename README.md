@@ -6,18 +6,18 @@
 
 A Model Context Protocol server that aggregates revenue across **Lemon Squeezy + Gumroad + Polar + Stripe** into a single Claude-queryable view. A solo founder can ask Claude *"what's my MRR across all my stores?"* — and Claude answers from one tool call instead of four browser tabs.
 
-**Status:** v0.1 — Lemon Squeezy adapter live-validated against production. Gumroad / Polar / Stripe adapters land in v0.2.
+**Status:** v0.2 — all four adapters shipped. LS + Gumroad live-validated against production; Polar + Stripe offline-validated (live test requires your own org/account). Freemium: 3 tools free, 3 paid (see [Pricing](#pricing)).
 
 ## Tools exposed to Claude
 
-| Tool | What it does |
-|------|--------------|
-| `summary_mrr(days=30)` | Combined MRR / ARR across every connected store. Per-provider breakdown. |
-| `top_customers(limit=10, days=30)` | Highest-revenue customers in window, ranked by gross USD. |
-| `refund_signal(days=7, alert_multiplier=2.0)` | Compares current N-day refund ratio to prior N-day ratio. Fires `alert` when ratio jumps ≥2x. Zero-case safe. |
-| `recent_orders(limit=20)` | Last N orders across all stores, normalized to one schema. |
-| `export_csv_for_tax(year, quarter)` | CSV export for Ukrainian FOP 3rd-group quarterly filing. Fetches NBU USD/UAH exchange rate per-order from `bank.gov.ua`. |
-| `health()` | Per-adapter healthcheck — useful before the others. |
+| Tool | Tier | What it does |
+|------|------|--------------|
+| `summary_mrr(days=30)` | **Free** | Combined MRR / ARR across every connected store. Per-provider breakdown. |
+| `recent_orders(limit=20)` | **Free** | Last N orders across all stores, normalized to one schema. |
+| `health()` | **Free** | Per-adapter healthcheck — useful before the others. |
+| `top_customers(limit=10, days=30)` | Paid | Highest-revenue customers in window, ranked by gross USD. |
+| `refund_signal(days=7, alert_multiplier=2.0)` | Paid | Current N-day refund ratio vs prior N-day window. Fires `alert` when ratio jumps ≥2x. Zero-case safe. |
+| `export_csv_for_tax(year, quarter)` | Paid | CSV export for Ukrainian FOP 3rd-group quarterly filing. NBU USD/UAH exchange rate per-order from `bank.gov.ua`. |
 
 ## Install (Claude Desktop / Claude Code / Cursor)
 
@@ -35,7 +35,11 @@ Until the PyPI release lands, install from this Git repo via [`uvx`](https://doc
       ],
       "env": {
         "LS_API_TOKEN": "your_lemon_squeezy_token_here",
-        "LS_STORE_ID": "optional_store_id_filter"
+        "LS_STORE_ID": "optional_store_id_filter",
+        "GUMROAD_ACCESS_TOKEN": "optional_gumroad_token",
+        "POLAR_API_TOKEN": "optional_polar_token",
+        "STRIPE_API_KEY": "optional_stripe_secret_key",
+        "INDIE_FOUNDER_MCP_LICENSE_KEY": "optional_license_key_for_paid_tier"
       }
     }
   }
@@ -60,36 +64,44 @@ indie-founder-mcp  # runs stdio transport
 Three open-source LS-only MCPs already exist on GitHub. All expose raw CRUD API calls. None monetized, none aggregated.
 
 This MCP differs:
-1. **Multi-source aggregation** — one query surface across LS + Gumroad + Polar + Stripe (v0.1 ships LS; rest follow in v0.2).
+1. **Multi-source aggregation** — one query surface across LS + Gumroad + Polar + Stripe (all four shipped in v0.2).
 2. **Summarized indie-founder daily view** — MRR, top customer, refund signal, churn risk — not raw API parroting.
-3. **CSV export for Ukrainian FOP tax filing** — third-section single-tax filers need a specific NBU-rate-anchored format. Ships in v0.1.
-4. **Freemium with paid tier** (v0.2) — LS license keys gate historical data + multi-store views.
+3. **CSV export for Ukrainian FOP tax filing** — third-section single-tax filers need a specific NBU-rate-anchored format.
+4. **Freemium with paid tier** — Lemon Squeezy license keys gate the analytics + tax-export tools; the daily-check tools stay free forever.
 
-## v0.1 ↔ Production validation
+## Production validation
 
-Built and validated on the author's own `charliemorrison.lemonsqueezy.com` store (store ID 344362):
+Built and validated on the author's own `charliemorrison.lemonsqueezy.com` store (store ID 344362) and live Gumroad account:
 
-- `health` → `{"lemonsqueezy": true}` against `/users/me`.
-- `recent_orders` → returns the real $17 *Social Media AI Mastery* order from `johannaakoenig@gmail.com` on 2026-05-07.
-- `summary_mrr` → `$0` MRR (correct — no subscriptions converted yet on this store; the tool's plumbing across active/trialing/past_due statuses is exercised).
-- `top_customers(limit=5, days=90)` → ranks customers by lifetime USD in window.
+- `health` → `{"lemonsqueezy": true, "gumroad": true}` against each provider's `/users/me`-equivalent.
+- `recent_orders` → returns the real $17 *Social Media AI Mastery* LS order from `johannaakoenig@gmail.com` on 2026-05-07, normalized into the same schema as Gumroad orders.
+- `summary_mrr` → `$0` MRR (correct — no subscriptions converted yet on these stores; the tool's plumbing across active/trialing/past_due statuses is exercised).
+- `top_customers(limit=5, days=90)` → ranks customers by lifetime USD across all wired providers.
 - `refund_signal(days=7)` → zero-case `alert=False` for healthy young stores.
 - `export_csv_for_tax(2026, 2)` → one row, `2026-05-07,lemonsqueezy,8274123,johannaakoenig@gmail.com,Social Media AI Mastery,17.00,0.00,17.00,43.8528,745.50,745.50` — NBU rate fetched live from `bank.gov.ua`.
 
-## Pricing (planned for v0.2)
+Polar + Stripe adapters are offline-validated (24 fixture tests across all four adapters pass). Live validation against those two requires the user's own Polar org / Stripe account — the adapter wires automatically when the corresponding env var is set.
 
-- **Free:** 1 connected store, last 30d of data, basic tools.
-- **Paid:** $9/mo or $79/yr — all stores, full history, CSV exports, daily summary alerts.
+## Pricing
+
+| Tier | Price | Tools |
+|------|-------|-------|
+| **Free** | $0 | `summary_mrr`, `recent_orders`, `health` — the daily-check loop. Unlimited stores. |
+| **Paid** | **$19/mo** or **$190/yr** (2 months free) | All Free tools **plus** `top_customers`, `refund_signal`, `export_csv_for_tax` (analytics + Ukrainian FOP CSV export). |
+
+Buy a license: **<https://charliemorrison.lemonsqueezy.com>** → drop the key into `INDIE_FOUNDER_MCP_LICENSE_KEY` and restart your MCP host.
+
+Free tools never check the license — there's no rug-pull. The paid tier is just the analytics + export surface for people who want them.
 
 ## License & monetization stack
 
-- Code: MIT (open server; v0.2 will gate premium features behind a license key).
-- License keys: Lemon Squeezy License API (already configured).
+- Code: MIT (open server; paid features gated by a Lemon Squeezy license key at runtime).
+- License keys: Lemon Squeezy License API (`/v1/licenses/validate`), 6-hour validation cache.
 - Payouts: LS → Wise USD (proven — $17 cleared on the dogfood store).
 
 ## Build plan
 
-See [`PLAN.md`](./PLAN.md) for the staged build sequence. v0.1 ships the LS adapter + 6 tools + tax CSV. v0.2 adds Gumroad / Polar / Stripe + license gate.
+See [`PLAN.md`](./PLAN.md) for the staged build sequence. v0.2 ships all four adapters + license gate + 6 tools (3 free, 3 paid).
 
 ## Why this exists
 

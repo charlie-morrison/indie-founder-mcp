@@ -20,6 +20,7 @@ from mcp.server.fastmcp import FastMCP
 
 from . import __version__
 from .adapters import RevenueAdapter
+from .licensing import validate_license_cached
 from .models import Order
 
 load_dotenv()
@@ -47,6 +48,46 @@ def _enabled_providers() -> list[str]:
 
 
 _ACTIVE_SUB_STATUSES = {"trialing", "active", "past_due"}
+
+_LICENSE_ENV = "INDIE_FOUNDER_MCP_LICENSE_KEY"
+_PURCHASE_URL = "https://charliemorrison.lemonsqueezy.com"
+_FREE_TOOLS = ("health", "summary_mrr", "recent_orders")
+_PAID_TOOLS = ("top_customers", "refund_signal", "export_csv_for_tax")
+
+
+async def _require_license() -> dict[str, Any] | None:
+    """Gate for paid-tier tools. Returns None on valid license, response dict otherwise.
+
+    Free tools (health, summary_mrr, recent_orders) skip this check entirely.
+    """
+    key = (os.getenv(_LICENSE_ENV) or "").strip()
+    if not key:
+        return {
+            "status": "license_required",
+            "version": __version__,
+            "message": (
+                "This tool is part of the paid tier. Set "
+                f"{_LICENSE_ENV} (Lemon Squeezy license key) to enable. "
+                f"Buy a key at {_PURCHASE_URL}."
+            ),
+            "free_tools": list(_FREE_TOOLS),
+            "paid_tools": list(_PAID_TOOLS),
+            "purchase_url": _PURCHASE_URL,
+        }
+    check = await validate_license_cached(key)
+    if not check.valid:
+        return {
+            "status": "license_invalid",
+            "version": __version__,
+            "license_status": check.status,
+            "expires_at": check.expires_at,
+            "message": (
+                f"License key is not valid (status={check.status}). "
+                f"Renew or buy a new key at {_PURCHASE_URL}."
+            ),
+            "raw_error": check.raw_error,
+        }
+    return None
 
 
 @mcp.tool()
@@ -101,7 +142,12 @@ async def top_customers(limit: int = 10, days: int = 30) -> dict[str, Any]:
     groups by customer email, sums gross USD, ranks descending. Refunds and
     non-USD orders are excluded from the spend total but counted in
     `excluded` for transparency.
+
+    Paid tier — requires INDIE_FOUNDER_MCP_LICENSE_KEY.
     """
+    gated = await _require_license()
+    if gated is not None:
+        return gated
     if not _adapters:
         return {
             "status": "no_adapters",
@@ -178,7 +224,12 @@ async def refund_signal(days: int = 7, alert_multiplier: float = 2.0) -> dict[st
 
     Zero-case: when no refunds in either window, returns alert=False with
     ratios=0.0 — the typical state for a healthy young store.
+
+    Paid tier — requires INDIE_FOUNDER_MCP_LICENSE_KEY.
     """
+    gated = await _require_license()
+    if gated is not None:
+        return gated
     if not _adapters:
         return {
             "status": "no_adapters",
@@ -348,9 +399,14 @@ async def export_csv_for_tax(year: int, quarter: int) -> dict[str, Any]:
     and counted in `excluded`. NBU rate fetched from
     bank.gov.ua/NBUStatService for each order's date (weekend dates walk
     forward to the next business-day rate).
+
+    Paid tier — requires INDIE_FOUNDER_MCP_LICENSE_KEY.
     """
     if quarter not in (1, 2, 3, 4):
         raise ValueError("quarter must be 1..4")
+    gated = await _require_license()
+    if gated is not None:
+        return gated
     if not _adapters:
         return {
             "status": "no_adapters",
@@ -472,6 +528,25 @@ def _wire_default_adapters() -> None:
 
         store_id = os.getenv("LS_STORE_ID") or None
         register_adapter(LemonSqueezyAdapter(token=ls_token, store_id=store_id))
+
+    gumroad_token = os.getenv("GUMROAD_ACCESS_TOKEN")
+    if gumroad_token:
+        from .adapters.gumroad import GumroadAdapter
+
+        register_adapter(GumroadAdapter(token=gumroad_token))
+
+    polar_token = os.getenv("POLAR_API_TOKEN")
+    if polar_token:
+        from .adapters.polar import PolarAdapter
+
+        org_id = os.getenv("POLAR_ORG_ID") or None
+        register_adapter(PolarAdapter(token=polar_token, organization_id=org_id))
+
+    stripe_key = os.getenv("STRIPE_API_KEY")
+    if stripe_key:
+        from .adapters.stripe import StripeAdapter
+
+        register_adapter(StripeAdapter(api_key=stripe_key))
 
 
 def main() -> None:
