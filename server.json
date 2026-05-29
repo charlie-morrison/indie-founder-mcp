@@ -60,7 +60,8 @@
           "isRequired": false,
           "isSecret": true
         }
-      ]
+      ],
+      "fileSha256": "78ea32280dffd83f0902189c4f8daa98818f27ad66e2e6c90f9c4ea2160f7ed3"
     }
   ],
   "_meta": {
@@ -75,9 +76,20 @@
         "health"
       ],
       "tiers": {
-        "free": ["summary_mrr", "recent_orders", "health"],
-        "paid": ["top_customers", "refund_signal", "export_csv_for_tax"],
-        "paid_price_usd": {"monthly": 19, "yearly": 190},
+        "free": [
+          "summary_mrr",
+          "recent_orders",
+          "health"
+        ],
+        "paid": [
+          "top_customers",
+          "refund_signal",
+          "export_csv_for_tax"
+        ],
+        "paid_price_usd": {
+          "monthly": 19,
+          "yearly": 190
+        },
         "purchase_url": "https://charliemorrison.lemonsqueezy.com"
       }
     }
